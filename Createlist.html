@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Sour+Gummy:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
+    <title>Music Playlist</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+        .container {
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background-color: #282828;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .header .details {
+            flex: 1;
+        }
+        .header h1 {
+            font-size: 36px;
+            margin: 0;
+        }
+        .header p {
+            margin: 5px 0;
+            font-size: 16px;
+            color: #ccc;
+        }
+        .song-list {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .song-list th, .song-list td {
+            text-align: left;
+            padding: 12px;
+            font-size: 16px;
+        }
+        .song-list th {
+            background-color: #444;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .song-list tr:nth-child(even) {
+            background-color: #333;
+        }
+        .song-list tr:hover {
+            background-color: #555;
+        }
+        .song-list td {
+            border-bottom: 1px solid #444;
+        }
+        .play-button {
+            background-color: #1db954;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .play-button:hover {
+            background-color: #1ed760;
+        }
+        button {
+            background-color: #1db954;
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1ed760;
+        }
+        .bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #121212;
+            padding: 6px 2px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .progress-bar {
+            width: 80%;
+            cursor: pointer;
+        }
+        .icons i {
+            cursor: pointer;
+            color: white;
+            font-size: 30px;
+        }
+        .song-info {
+            position: absolute;
+            left: 10vh;
+            top: 35px;
+            color: white;
+        }
+        .song-info img {
+            opacity: 0;
+            transition: opacity 0.8s ease-in;
+        }
+        .time-display {
+            font-size: 12px;
+            color: #fff;
+        }
+        #volumeBar {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="/Arjith.jpg" alt="Playlist Cover">
+            <div class="details">
+                <h1>Arijit Singh Playlist</h1>
+                <p>Enjoy the best of Arijit Singh</p>
+                <button class="play-button" onclick="playAllSongs()">Play All</button>
+            </div>
+        </div>
+
+        <table class="song-list">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Duration</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="songTableBody">
+                <!-- Songs will be dynamically loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bottom">
+        <input type="range" id="myProgressBar" class="progress-bar" min="0" max="100" value="0">
+        <div class="icons">
+            <i class="fas fa-backward" onclick="previousSong()"></i>
+            <i class="far fa-circle-play" id="masterPlay" onclick="togglePlay()"></i>
+            <i class="fas fa-forward" onclick="nextSong()"></i>
+        </div>
+        <div class="song-info">
+            <img src="" id="currentSongCover" width="50" height="50" alt="Song Cover">
+            <div id="songName">Song Name</div>
+            <div class="time-display">
+                <span id="currentTime">00:00</span> / <span id="duration">00:00</span>
+            </div>
+        </div>
+        <input type="range" id="volumeBar" min="0" max="100" value="100">
+    </div>
+
+    <script>
+        let songIndex = 0;
+        let songs = [
+            { songName: "Tum Hi Ho", filePath: "Songs/Aaj ki Raat.mp3", duration: "4:22", coverPath: "/image/1.png" },
+            { songName: "Raabta", filePath: "songs/raabta.mp3", duration: "4:01", coverPath: "/image/2.png" },
+            { songName: "Channa Mereya", filePath: "songs/channa_mereya.mp3", duration: "4:45", coverPath: "/image/3.png" },
+            { songName: "Tera Yaar Hoon Main", filePath: "songs/tera_yaar.mp3", duration: "4:30", coverPath: "/image/4.png" },
+            { songName: "Phir Le Aya Dil", filePath: "songs/phir_le_aya_dil.mp3", duration: "5:01", coverPath: "/image/5.png" },
+            { songName: "Kabira", filePath: "songs/kabira.mp3", duration: "4:11", coverPath: "/image/6.png" },
+            { songName: "Sanam Re", filePath: "songs/sanam_re.mp3", duration: "4:20", coverPath: "/image/7.png" },
+            { songName: "Gerua", filePath: "songs/gerua.mp3", duration: "4:52", coverPath: "/image/8.png" },
+            { songName: "Ae Dil Hai Mushkil", filePath: "songs/ae_dil_hai.mp3", duration: "4:29", coverPath: "/image/9.png" },
+            { songName: "Shayad", filePath: "songs/shayad.mp3", duration: "3:55", coverPath: "/image/10.png" },
+            { songName: "Sooraj Dooba Hain", filePath: "songs/sooraj_dooba.mp3", duration: "3:45", coverPath: "/image/11.png" },
+            { songName: "Kalank", filePath: "songs/kalank.mp3", duration: "5:11", coverPath: "/image/12.png" },
+            { songName: "Dil Sambhal Ja Zara", filePath: "songs/dil_sambhal.mp3", duration: "4:05", coverPath: "/image/13.png" },
+            { songName: "Janam Janam", filePath: "songs/janam_janam.mp3", duration: "3:54", coverPath: "/image/14.png" },
+            { songName: "Zaalima", filePath: "songs/zaalima.mp3", duration: "4:40", coverPath: "/image/15.png" }
+        ];
+
+        const audioElement = new Audio();
+        
+        // Load song list dynamically
+        function loadSongs() {
+            const songTableBody = document.getElementById('songTableBody');
+            songTableBody.innerHTML = '';
+            songs.forEach((song, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${song.songName}</td>
+                    <td>${song.duration}</td>
+                    <td><button onclick="playSong(${index})">Play</button></td>
+                `;
+                songTableBody.appendChild(row);
+            });
+        }
+
+        // Play selected song
+        function playSong(index) {
+            songIndex = index;
+            const selectedSong = songs[songIndex];
+            audioElement.src = selectedSong.filePath;
+            document.getElementById('currentSongTitle').innerText = selectedSong.songName;
+            document.getElementById('currentSongCover').src = selectedSong.coverPath;
+            document.getElementById('songName').innerText = selectedSong.songName;
+            audioElement.play();
+            document.getElementById('masterPlay').className = 'fas fa-pause';
+            updateProgress();
+        }
+
+        // Play or pause the current song
+        function togglePlay() {
+            if (audioElement.paused) {
+                audioElement.play();
+                document.getElementById('masterPlay').className = 'fas fa-pause';
+            } else {
+                audioElement.pause();
+                document.getElementById('masterPlay').className = 'fas fa-play';
+            }
+        }
+
+        // Go to next song
+        function nextSong() {
+            songIndex = (songIndex + 1) % songs.length;
+            playSong(songIndex);
+        }
+
+        // Go to previous song
+        function previousSong() {
+            songIndex = (songIndex - 1 + songs.length) % songs.length;
+            playSong(songIndex);
+        }
+
+        // Update the progress bar
+        function updateProgress() {
+            audioElement.addEventListener('timeupdate', () => {
+                const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                document.getElementById('myProgressBar').value = progress;
+                const currentMinutes = Math.floor(audioElement.currentTime / 60);
+                const currentSeconds = Math.floor(audioElement.currentTime % 60);
+                document.getElementById('currentTime').innerText = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
+
+                const durationMinutes = Math.floor(audioElement.duration / 60);
+                const durationSeconds = Math.floor(audioElement.duration % 60);
+                document.getElementById('duration').innerText = `${durationMinutes}:${durationSeconds < 10 ? '0' : ''}${durationSeconds}`;
+            });
+        }
+
+        // Allow the user to seek through the song
+        document.getElementById('myProgressBar').addEventListener('input', (e) => {
+            const seekTo = (e.target.value / 100) * audioElement.duration;
+            audioElement.currentTime = seekTo;
+        });
+
+        // Handle volume control
+        document.getElementById('volumeBar').addEventListener('input', (e) => {
+            audioElement.volume = e.target.value / 100;
+        });
+
+        // Load the songs on page load
+        loadSongs();
+    </script>
+    <script src="https://kit.fontawesome.com/a93b9875e8.js" crossorigin="anonymous"></script>
+</body>
+</html>
